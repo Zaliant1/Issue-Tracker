@@ -3,7 +3,6 @@ import json
 import urllib.parse
 import pymongo
 from bson import ObjectId
-from bson.objectid import ObjectId
 from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
@@ -42,29 +41,37 @@ async def get_all_by_category(category: str):
     return json.dumps(issues, default=json_serial)
 
 
+
+
+@app.post('/')
+async def update_issue(request: Request):
+    req_info = await request.json()
+
+    issue_id = ObjectId(req_info['_id']["$oid"])
+    req_info.pop('_id')
+
+    db.issues.find_one_and_update({'_id': issue_id}, {"$set": req_info}, upsert=False)
+
+    issues = list(db.issues.find({'_id' : issue_id}))
+    return json.dumps(issues, default=json_serial)
+
+
+@app.put('/')
+async def create_issue(request: Request):
+    req_info = await request.json()
+    return db.issues.insert_one(req_info)
+
+
    
-@app.post("/id")
+@app.delete("/")
 async def delete_issue(request: Request):
+   req_info = await request.json()
+   issue_id = ObjectId(req_info)
+   issue_delete = db.issues.find_one_and_delete({'_id': issue_id})
+ 
+    
+   return issue_delete
 
-    # issues = list(db.issues.find({'category': 'zemer'}))
-    # get_issue_id = json.dumps(issues[0]["_id"] , default=json_serial)
-
-
-    # get_id = ObjectId(request.params)
-    return request.params
-
-
-
-# router.put("/", async (req, res) => {
-#   const issue = new Issue(req.body);
-
-#   try {
-#     const newIssue = await issue.save();
-#     res.status(201).json(newIssue);
-#   } catch (error) {
-#     res.status(400).json({ error: error.message });
-#   }
-# });
 
 
 
