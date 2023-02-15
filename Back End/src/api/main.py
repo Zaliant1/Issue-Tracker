@@ -2,6 +2,7 @@ import os
 import json
 import urllib.parse
 import pymongo
+import discord
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI, Request
@@ -9,7 +10,9 @@ from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import json
 
-
+from ..bot.main import category as bot_category
+from ..bot import main as bot
+from . import webhooks
 
 load_dotenv()
 
@@ -36,6 +39,11 @@ async def root():
     return "asdf"
 
 
+@app.get("/bot-test")
+async def root():
+    return
+
+
 @app.get('/findexact')
 async def get_exact(request: Request):
     req_info = await request.json()
@@ -48,7 +56,8 @@ async def get_exact(request: Request):
 
 @app.get('/api/category/{category}')
 async def get_all_by_category(category: str):
-    issues = list(db.issues.find({'category': {category}}))
+    issues = list(db.issues.find({'category': category}))
+    bot_category(json.dumps(issues, default=json_serial))
     return json.dumps(issues, default=json_serial)
 
 
@@ -73,6 +82,8 @@ async def create_issue(request: Request):
    
    
     issues = list(db.issues.find(search_query))
+    webhooks.send_new_issue(
+        f"status : {issues[0]['status']}\ncategory: {issues[0]['category']}\npriority: {issues[0]['priority']}\nversion: {issues[0]['version']}\nplayer: {issues[0]['playerName']}\n")
 
     return json.dumps(issues, default=json_serial)
 
