@@ -13,12 +13,14 @@ import json
 from ..bot.main import category as bot_category
 from ..bot import main as bot
 from . import webhooks
+from . import utils
 
 load_dotenv()
 
 USERNAME = urllib.parse.quote_plus(os.getenv('USERNAME'))
 PASSWORD = urllib.parse.quote_plus(os.getenv('PASSWORD'))
 URI = f"mongodb+srv://{USERNAME}:{PASSWORD}@cluster0.81uebtg.mongodb.net/?retryWrites=true&w=majority"
+
 
 
 client = pymongo.MongoClient(URI)
@@ -44,53 +46,59 @@ async def root():
     return
 
 
-@app.get('/findexact')
+@app.post('/api/issue/findexact')
 async def get_exact(request: Request):
     req_info = await request.json()
-    issue_id = ObjectId(req_info['_id']["$oid"])
+    if req_info.get('_id'):
+        del req_info['_id']
 
-    issues = list(db.issues.find({'_id' : issue_id}))
-    return json.dumps(issues, default=json_serial)
+    return utils.prepare_json(db.issues.find_one(req_info))
+
+@app.get('/api/issue/{issue_id}')
+async def get_exact(issue_id):
+    return utils.prepare_json(db.issues.find_one({'_id' : ObjectId(issue_id)}))
 
 
 
-@app.get('/api/category/{category}')
+@app.get('/api/issue/category/{category}')
 async def get_all_by_category(category: str):
     issues = list(db.issues.find({'category': category}))
-    bot_category(json.dumps(issues, default=json_serial))
-    return json.dumps(issues, default=json_serial)
+    return utils.prepare_json(issues)
 
 
-@app.post('/')
-async def update_issue(request: Request):
+@app.post('/api/issue/{issue_id}')
+async def update_issue(issue_id, request: Request):
     req_info = await request.json()
 
-    issue_id = ObjectId(req_info['_id']["$oid"])
+    issue_id = ObjectId(issue_id)
     req_info.pop('_id')
 
-    db.issues.find_one_and_update({'_id': issue_id}, {"$set": req_info}, upsert=False)
+    issue = db.issues.find_one_and_update({'_id': issue_id}, {"$set": req_info}, upsert=False)
 
-    issues = list(db.issues.find({'_id' : issue_id}))
-    return json.dumps(issues, default=json_serial)
+    diff = []
+
+    for key, value in req_info.items():
+        if value == issue[key]:
+            continue
+
+        diff.append({"new": value, "old": issue[key], "key": key})
+
+    webhooks.send_update_issue(diff)
+
+    return utils.prepare_json(issue)
 
 
-@app.put('/')
+@app.put('/api/issue')
 async def create_issue(request: Request):
     req_info = await request.json()
-    db.issues.insert_one(req_info)
-    search_query = {k:v for k,v in req_info.items()}
+    issue = db.issues.insert_one(req_info)
    
-   
-    issues = list(db.issues.find(search_query))
-    webhooks.send_new_issue(
-        f"status : {issues[0]['status']}\ncategory: {issues[0]['category']}\npriority: {issues[0]['priority']}\nversion: {issues[0]['version']}\nplayer: {issues[0]['playerName']}\n")
+    webhooks.send_new_issue(req_info)
 
-    return json.dumps(issues, default=json_serial)
+    return utils.json_ready(issue.inserted_id)
 
 
 
-@app.delete("/")
-async def delete_issue(request: Request):
-   req_info = await request.json()
-   issue_id = ObjectId(req_info)
-   db.issues.find_one_and_delete({'_id': issue_id})
+@app.delete("/api/issue/{issue_id}")
+async def delete_issue(issue_id):
+    db.issues.find_one_and_delete({'_id': ObjectId(issue_id)})
