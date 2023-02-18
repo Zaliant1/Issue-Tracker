@@ -1,5 +1,5 @@
 import discord
-from discord import ui, app_commands
+from discord import ui, app_commands, Color
 from discord.ext import commands
 import requests
 
@@ -31,6 +31,7 @@ class Bot(discord.Client):
         self.tree = app_commands.CommandTree(self)
 
     async def setup_hook(self):
+        self.tree.copy_global_to(guild=MY_GUILD)
         await self.tree.sync(guild=MY_GUILD)
 
     async def on_guild_join(self, guild):
@@ -89,15 +90,18 @@ class MyModal(discord.ui.Modal):
             "http://localhost:8000/api/issue",
             json=issue,
         ).json()
-
-        await interaction.response.send_message(
-            f"http://localhost:3000/issue/{response}"
+        embed = discord.Embed(
+            title="Issue Created!",
+            description=f"You can go [here](http://localhost:3000/issue/{response}) to fill out modlogs, attachments, and description",
+            color=Color.blurple(),
         )
 
+        await interaction.response.send_message(embed=embed)
 
-@client.tree.command(name="modaltest")
-async def modaltest(interaction: discord.Interaction):
-    """Shows an example of a modal dialog being invoked from a slash command."""
+
+@client.tree.command(name="add-issue")
+async def add_issue_modal(interaction: discord.Interaction):
+    """Brings up a modal to submit a new issue. NOTE: you will need to go to the website to add modlogs, description, and attachments"""
     modal = MyModal(title="New Issue Submission")
     await interaction.response.send_modal(modal)
 

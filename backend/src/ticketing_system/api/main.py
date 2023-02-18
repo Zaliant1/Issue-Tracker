@@ -36,11 +36,6 @@ async def root():
     return "asdf"
 
 
-@app.get("/embed_test")
-async def bot_test():
-    webhooks.embed_test()
-
-
 @app.post("/api/issue/findexact")
 async def get_exact(request: Request):
     req_info = await request.json()
@@ -80,7 +75,7 @@ async def update_issue(issue_id, request: Request):
 
         diff.append({"new": value, "old": issue[key], "key": key})
 
-    webhooks.send_update_issue(diff)
+    webhooks.send_update_issue(diff, issue_id)
 
     return utils.prepare_json(issue)
 
