@@ -1,22 +1,17 @@
 import discord
-from discord import ui, app_commands, Color
-from discord.ext import commands
 import requests
-
-# from discord.ui import Select, View, Button, TextInput, Modal
 import os
-import json
+from discord import ui, app_commands, Color
 from dotenv import load_dotenv
-from ..api import webhooks
+
 
 load_dotenv()
 
 CHANNEL = "b"
 CMD_CHANNEL = "b"
-COMMAND_PREFIX = "?"
+COMMAND_PREFIX = "!"
 TOKEN = os.getenv("TOKEN")
 SECRET = os.getenv("CLIENT_SECRET")
-
 MY_GUILD = discord.Object(id=636623317180088321)
 
 
@@ -25,7 +20,7 @@ intents.members = True
 intents.message_content = True
 
 
-class Bot(discord.Client):
+class Client(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
@@ -38,7 +33,7 @@ class Bot(discord.Client):
         await self.tree.sync(guild=guild)
 
 
-client = Bot(intents=intents)
+client = Client(intents=intents)
 
 
 class MyModal(discord.ui.Modal):
@@ -101,15 +96,112 @@ class MyModal(discord.ui.Modal):
 
 @client.tree.command(name="add-issue")
 async def add_issue_modal(interaction: discord.Interaction):
-    """Brings up a modal to submit a new issue. NOTE: you will need to go to the website to add modlogs, description, and attachments"""
+    """Brings up a modal to submit a new issue"""
     modal = MyModal(title="New Issue Submission")
     await interaction.response.send_modal(modal)
+
+
+@client.tree.command(
+    name="create-quick-project",
+    description="create a new project with a channel and a webhook",
+)
+async def create_project_quickstart(
+    interaction: discord.Interaction,
+    name: str,
+):
+    channel = await interaction.guild.create_text_channel(name.replace(" ", "-"))
+    webhook = await channel.create_webhook(
+        name=client.user.name,
+    )
+
+    await interaction.response.send_message(
+        " project created with <#{channel.id}> and created webhook"
+    )
+
+
+@client.tree.command(
+    name="create-project",
+    description="create a new project with a channel used as an issue feed",
+)
+async def create_project(
+    interaction: discord.Interaction,
+    name: str,
+):
+    # put req and add project name without creating a channel or webhook
+
+    await interaction.response.send_message(f"created project {name}")
+
+
+@client.tree.command(
+    name="create-quick-issue-feed",
+    description="create a new issue tracker channel with webhook",
+)
+async def create_issue_feed_quickstart(
+    interaction: discord.Interaction,
+    channel_name: str,
+):
+    channel = await interaction.guild.create_text_channel(
+        channel_name.replace(" ", "-")
+    )
+    webhook = await channel.create_webhook(
+        name=client.user.name,
+    )
+
+    await interaction.response.send_message(f"created <#{channel.id}> with a webhook")
+
+
+@client.tree.command(
+    name="issue-feed",
+    description="use an existing channel for the issue feed",
+)
+async def create_issue_feed(
+    interaction: discord.Interaction,
+    channel_id: str,
+):
+    channel = await interaction.guild.fetch_channel(channel_id)
+    webhook = await channel.create_webhook(
+        name=client.user.name,
+    )
+
+    await interaction.response.send_message(f"created webhook in<#{channel.id}>")
+
+
+@client.tree.command(
+    name="add-contributors",
+    description="add contributors to your project, you can add multiple ids separated by commas",
+)
+async def add_contributors(
+    interaction: discord.Interaction,
+    project: str,
+    user_id: str,
+):
+    # find the project
+    contributors_to_add = user_id.split(",")
+    # then add the contributors
+
+    if len(contributors_to_add) == 1:
+        await interaction.response.send_message(f"added contributor")
+    elif len(contributors_to_add) > 1:
+        await interaction.response.send_message(
+            f"added {len(contributors_to_add)} contributors"
+        )
 
 
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user} (ID: {client.user.id})")
     print("------")
+
+
+@client.tree.command(name="hello")
+async def say_hello(ctx):
+    await ctx.send("hello")
+
+
+# async def load_cogs():
+#     for filename in os.listdir("./src/ticketing_system/bot/cogs"):
+#         if filename.endswith(".py"):
+#             await client.load_extension(f"{filename[:-3]}")
 
 
 def main():
