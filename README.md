@@ -4,7 +4,6 @@
 ```
 {
     _id: ObjectId(),
-    project_id: Int,
     name: String,
     author: ObjectId(),
     contibutors: List,
@@ -15,7 +14,7 @@
 ```
 {
     _id: ObjectId(),
-    project_id: int,
+    project_id: ObjectId(),
     name: String,
     url: String
     guild_id: Int,
@@ -54,7 +53,7 @@
 {
     _id: ObjectId(),
     project_id: Int,
-    playerName: String,
+    user_id: String,
     version: String,
     summary: String,
     description: String
@@ -85,14 +84,14 @@ Associates the discord guild with a project_id
 `project_name`
 
 *Returns*
-new `project_id`
+new `project_name`
 
 ### /register-issue-feed
 *Description*
 Will create webhook for issue feed on the specified project to the channel the command is run in.
 
 *Parameters*
-`project_id`
+`project_name`
 
 *Returns*
 new `webhook_id` (unclear if this is possible)
@@ -108,7 +107,7 @@ Creates a webhook on the newly created channel for issue feed
 `project_name`
 
 *Returns*
-new `project_id`
+new `project_name`
 new `channel_id`
 new `webhook_id` (unclear if this is possible)
 
@@ -118,10 +117,10 @@ new `webhook_id` (unclear if this is possible)
 Assosiates a contributor to a project and will provide additional access to issue site
 
 *Parameters*
-`project_id`
+`project_name`
 `user_id` (@'ed value)
 
 *Returns*
-new `project_id`
+new `project_name`
 new `channel_id`
 new `webhook_id` (unclear if this is possible)

@@ -1,4 +1,10 @@
+import os
+import pymongo
+from dotenv import load_dotenv
 from bson import ObjectId
+from urllib.parse import quote_plus
+
+load_dotenv()
 
 
 def json_ready(data):
@@ -30,3 +36,11 @@ def prepare_json(data):
         return output
     else:
         return json_ready(data)
+
+
+def get_db_client(db="test"):
+    USERNAME = quote_plus(os.getenv("USERNAME"))
+    PASSWORD = quote_plus(os.getenv("PASSWORD"))
+    URI = f"mongodb+srv://{USERNAME}:{PASSWORD}@cluster0.81uebtg.mongodb.net/?retryWrites=true&w=majority"
+
+    return pymongo.MongoClient(URI)[db]

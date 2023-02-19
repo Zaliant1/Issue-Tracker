@@ -4,14 +4,10 @@ from discord import ui, Color
 
 
 class NewIssue(ui.Modal):
+    issue: dict
+
     category = ui.TextInput(
         label="category",
-        placeholder="Issue Category",
-    )
-
-    player = ui.TextInput(
-        label="player",
-        placeholder="Player Name",
     )
 
     version = ui.TextInput(
@@ -19,17 +15,28 @@ class NewIssue(ui.Modal):
         placeholder="Version",
     )
 
-    summary = ui.TextInput(
-        label="summary",
-        placeholder="Issue Summary",
+    summary = ui.TextInput(label="summary", placeholder="Summary")
+
+    description = ui.TextInput(
+        label="description",
+        placeholder="Description",
         style=discord.TextStyle.paragraph,
     )
-    issue: dict
 
-    def __init__(self, project_id: int, issue_type: str, user_id: str, *args, **kwargs):
+    def __init__(
+        self,
+        project_id: int,
+        issue_type: str,
+        user_id: str,
+        priority: str,
+        *args,
+        **kwargs,
+    ):
         self.project_id = project_id
         self.issue_type = issue_type
         self.user_id = user_id
+        self.priority = priority
+
         super().__init__(*args, **kwargs)
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -38,10 +45,9 @@ class NewIssue(ui.Modal):
             "summary": self.summary.value,
             "category": self.category.value,
             "type": self.issue_type,
-            "priority": "high",
-            "playerName": self.player.value,
+            "priority": self.priority,
             "version": self.version.value,
-            "description": "",
+            "description": self.description.value,
             "modLogs": {
                 "title": "",
                 "body": "",

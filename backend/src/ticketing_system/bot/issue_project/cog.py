@@ -51,18 +51,34 @@ class IssueProject(commands.Cog):
             discord.app_commands.Choice(name="Suggestion", value=2),
         ]
     )
+    @app_commands.choices(
+        priority=[
+            discord.app_commands.Choice(name="Low", value=1),
+            discord.app_commands.Choice(name="Medium", value=2),
+            discord.app_commands.Choice(name="High", value=3),
+        ]
+    )
     async def add_issue(
         self,
         interaction: discord.Interaction,
         project_id: int,
         issue_type: discord.app_commands.Choice[int],
+        priority: discord.app_commands.Choice[int],
     ):
+        categories = [
+            "zemar",
+            "dayya",
+            "foobar",
+        ]  # TODO: Change fetch api based on project ID
+
         modal = NewIssue(
             title="New Issue Submission",
             project_id=project_id,
             issue_type=issue_type.name.lower(),
             user_id=interaction.user.id,
+            priority=priority.name.lower(),
         )
+        modal.category.placeholder = " | ".join(categories)
         await interaction.response.send_modal(modal)
 
 
