@@ -5,10 +5,11 @@ import pymongo
 import discord
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import json
+import traceback
 
 from . import webhooks
 from . import utils
@@ -83,10 +84,16 @@ async def update_issue(issue_id, request: Request):
 @app.put("/api/issue")
 async def create_issue(request: Request):
     req_info = await request.json()
-    issue = db.issues.insert_one(req_info)
+
+    # TODO: check to see if user_id is allowed to create this issue on the project_id
+
+    try:
+        issue = db.issues.insert_one(req_info)
+    except:
+        print(traceback.format_exc())
+        raise HTTPException(status_code=503, detail="Unable write issue to database")
 
     webhooks.send_new_issue(req_info)
-
     return utils.json_ready(issue.inserted_id)
 
 
@@ -95,3 +102,32 @@ async def delete_issue(issue_id):
     issue = db.issues.find_one({"_id": ObjectId(issue_id)})
     db.issues.find_one_and_delete({"_id": ObjectId(issue_id)})
     webhooks.send_deleted_issue(issue)
+
+
+@app.get("/api/project/{project_id}")
+async def get_project(project_id):
+    project = db.projects.find_one({"project_id": project_id})
+
+    if project:
+        return utils.json_ready(
+            {
+                **project,
+                "webhooks": [i for i in db.webhooks.find({"project_id": project_id})],
+            }
+        )
+
+
+# @app.put("/api/project")
+# async def get_project(request: Request):
+#     req_info = await request.json()
+
+#     project = db.projects.find_one({"project_id": project_id})
+
+#     if project:
+#         return utils.json_ready(
+#             {
+#                 **project,
+#                 "webhooks": [i for i in db.webhooks.find({"project_id": project_id})],
+#             }
+#         )
+# { $inc: { field1: incrementAmount1, field2: incrementAmount2, ... }
