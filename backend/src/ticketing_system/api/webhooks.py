@@ -7,7 +7,6 @@ load_dotenv()
 
 IGNORED_UPDATE_EVENT_KEYS = ["modLogs", "description", "attachments"]
 webhook = discord.SyncWebhook.from_url(os.getenv("WEBHOOK_URL"))
-print(webhook)
 
 
 def create_embed(message, color, title):
@@ -22,11 +21,10 @@ def create_new_issue_embed(issue):
 
     embed = discord.Embed(color=color)
 
-    embed.add_field(name="Type", value=issue["type"], inline=False)
-    embed.add_field(name="Category", value=issue["category"], inline=False)
     embed.add_field(name="Summary", value=issue["summary"], inline=False)
-    embed.add_field(name="Version", value=issue["version"], inline=False)
-    embed.add_field(name="Player", value=issue["playerName"], inline=False)
+    embed.add_field(name="Type", value=issue["type"], inline=False)
+    embed.add_field(name="Category", value=issue["category"], inline=True)
+    embed.add_field(name="Version", value=issue["version"], inline=True)
 
     return embed
 

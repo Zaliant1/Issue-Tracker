@@ -3,8 +3,13 @@ import pymongo
 from dotenv import load_dotenv
 from bson import ObjectId
 from urllib.parse import quote_plus
+import re
 
 load_dotenv()
+
+
+def alphanumeric_check(data):
+    re.search([letter for letter in data.split("")], "(\w+\s\w+)")
 
 
 def json_ready(data):

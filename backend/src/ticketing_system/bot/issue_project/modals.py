@@ -68,7 +68,7 @@ class NewIssue(ui.Modal):
 
             embed = discord.Embed(
                 title="Issue Created!",
-                description=f"You can go [here](http://localhost:3000/issue/{response}) to fill out modlogs, attachments, and description",
+                description=f"You can go [here](http://localhost:3000/issue/{response}) to fill submit modlogs and add  attachments",
                 color=Color.blurple(),
             )
 

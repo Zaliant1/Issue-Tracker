@@ -3,6 +3,7 @@ import discord
 from discord import app_commands, Color
 from discord.ext import commands
 
+
 from .modals import NewIssue
 
 
@@ -27,18 +28,6 @@ class IssueProject(commands.Cog):
     @commands.command(name="user-mention")
     async def user_mention(self, ctx: commands.Context) -> None:
         await ctx.send(f"<@{ctx.author.id}>")
-
-    @app_commands.command(
-        name="register-issue-feed",
-        description="Will create webhook for issue feed on the specified project to the channel the command is run in.",
-    )
-    @app_commands.describe(
-        project_id="id of the project you want to register issue feed for"
-    )
-    async def register_issue_feed(
-        self, interaction: discord.Interaction, project_id: str
-    ):
-        await interaction.response.send_message(f"Issue feed registered!")
 
     @app_commands.command(name="add-issue")
     @app_commands.describe(
@@ -81,36 +70,173 @@ class IssueProject(commands.Cog):
         modal.category.placeholder = " | ".join(categories)
         await interaction.response.send_modal(modal)
 
+    @app_commands.command(
+        name="create-project",
+        description="create a new project with a channel used as an issue feed",
+    )
+    async def create_project(
+        self,
+        interaction: discord.Interaction,
+        name: str,
+    ):
+        new_project = {
+            "name": name,
+            "author": interaction.user.id,
+            "contributors": [],
+        }
+        if new_project["name"].replace(" ", "").isalnum():
+            new_project["name"] = new_project["name"].replace(" ", "-")
 
-# @client.tree.command(
-#     name="create-quick-project",
-#     description="create a new project with a channel and a webhook",
-# )
-# async def create_project_quickstart(
-#     interaction: discord.Interaction,
-#     name: str,
-# ):
-#     channel = await interaction.guild.create_text_channel(name.replace(" ", "-"))
-#     webhook = await channel.create_webhook(
-#         name=client.user.name,
-#     )
+            response = requests.put(
+                "http://localhost:8000/api/project",
+                json=new_project,
+            )
 
-#     await interaction.response.send_message(
-#         " project created with <#{channel.id}> and created webhook"
-#     )
+            if response.status_code == 200:
+                response = response.json()
+                embed = discord.Embed(
+                    title="Project Created!",
+                    description=f"You can go [here](http://localhost:3000/project/{new_project['name']}) to see your newly created project",
+                    color=Color.blurple(),
+                )
+                await interaction.response.send_message(embed=embed, ephemeral=True)
 
+        else:
+            await interaction.response.send_message(
+                f"Project name {name} must be alphanumeric, spaces are accepted",
+                ephemeral=True,
+            )
 
-# @client.tree.command(
-#     name="create-project",
-#     description="create a new project with a channel used as an issue feed",
-# )
-# async def create_project(
-#     interaction: discord.Interaction,
-#     name: str,
-# ):
-#     # put req and add project name without creating a channel or webhook
+    @app_commands.command(
+        name="setup-project",
+        description="create a new project with a channel and a webhook",
+    )
+    async def create_project_quickstart(
+        self,
+        interaction: discord.Interaction,
+        name: str,
+    ):
+        new_project = {
+            "name": name,
+            "author": interaction.user.id,
+            "contributors": [],
+        }
+        if new_project["name"].replace(" ", "").isalnum():
+            new_project["name"] = new_project["name"].replace(" ", "-")
 
-#     await interaction.response.send_message(f"created project {name}")
+            response = requests.put(
+                "http://localhost:8000/api/project",
+                json=new_project,
+            )
+
+            if response.status_code == 200:
+                channel = await interaction.guild.create_text_channel(
+                    name.replace(" ", "-")
+                )
+                webhook = await channel.create_webhook(
+                    name=interaction.client.user.name
+                )
+
+                new_webhook = {
+                    "project_name": str(name),
+                    "url": str(webhook.url),
+                    "guild_id": str(webhook.guild_id),
+                    "channel_": str(webhook.channel),
+                    "channel_id": str(webhook.channel_id),
+                    "categories": [],
+                }
+
+                response_webhooks = requests.put(
+                    "http://localhost:8000/api/project/webhooks",
+                    json=new_webhook,
+                )
+
+                if response_webhooks.status_code == 200:
+                    embed = discord.Embed(
+                        title="Project Created!",
+                        description=f"Project created with <#{channel.id}> with webhook in channel, You can go [here](http://localhost:3000/project/{new_project['name']}) to see your newly created project",
+                        color=Color.blurple(),
+                    )
+                    await interaction.response.send_message(embed=embed, ephemeral=True)
+                else:
+                    await interaction.response.send_message(
+                        f"created project, channels, and webhook, but had an issue writing the webhook to the database {response_webhooks.status_code}",
+                        ephemeral=True,
+                    )
+            else:
+                await interaction.response.send_message(
+                    response.status_code, ephemeral=True
+                )
+        else:
+            await interaction.response.send_message(
+                f"Project name {name} must be alphanumeric, spaces are accepted",
+                ephemeral=True,
+            )
+
+    @app_commands.command(
+        name="register-issue-feed",
+        description="Will create webhook for issue feed on the specified project to the channel the command is run in.",
+    )
+    async def create_issue_feed(
+        self,
+        interaction: discord.Interaction,
+        project_name: str,
+    ):
+        webhook = await interaction.channel.create_webhook(
+            name=interaction.client.user.name
+        )
+
+        new_webhook = {
+            "project_name": str(project_name),
+            "url": str(webhook.url),
+            "guild_id": str(webhook.guild_id),
+            "channel_": str(webhook.channel),
+            "channel_id": str(webhook.channel_id),
+            "categories": [],
+        }
+
+        response_webhooks = requests.put(
+            "http://localhost:8000/api/project/webhooks",
+            json=new_webhook,
+        )
+
+        if response_webhooks.status_code == 200:
+            embed = discord.Embed(
+                title="Project Created!",
+                description="Webhook for issue feed created in current channel",
+                color=Color.blurple(),
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        else:
+            await interaction.response.send_message(
+                f"created webhook, but had an issue writing the webhook to the database {response_webhooks.status_code}",
+                ephemeral=True,
+            )
+
+    @app_commands.command(
+        name="add-contributors",
+        description="add a contributor to your project",
+    )
+    async def add_contributors(
+        self,
+        interaction: discord.Interaction,
+        project_name: str,
+        user_id: str,
+    ):
+        ##get username
+        data = {"project_name": project_name, "user_id": user_id}
+        response = requests.post(
+            "http://localhost:8000/api/project/contributors",
+            json=data,
+        )
+
+        if response.status_code == 200:
+            embed = discord.Embed(
+                title="Contributor Added!",
+                description=f"<@{user_id}> added as contributor to {project_name}",
+                color=Color.blurple(),
+            )
+            await interaction.response.send_message(embed=embed)
 
 
 # @client.tree.command(
@@ -129,40 +255,3 @@ class IssueProject(commands.Cog):
 #     )
 
 #     await interaction.response.send_message(f"created <#{channel.id}> with a webhook")
-
-
-# @client.tree.command(
-#     name="issue-feed",
-#     description="use an existing channel for the issue feed",
-# )
-# async def create_issue_feed(
-#     interaction: discord.Interaction,
-#     channel_id: str,
-# ):
-#     channel = await interaction.guild.fetch_channel(channel_id)
-#     webhook = await channel.create_webhook(
-#         name=client.user.name,
-#     )
-
-#     await interaction.response.send_message(f"created webhook in <#{channel.id}>")
-
-
-# @client.tree.command(
-#     name="add-contributors",
-#     description="add contributors to your project, you can add multiple ids separated by commas",
-# )
-# async def add_contributors(
-#     interaction: discord.Interaction,
-#     project: str,
-#     user_id: str,
-# ):
-#     # find the project
-#     contributors_to_add = user_id.split(",")
-#     # then add the contributors
-
-#     if len(contributors_to_add) == 1:
-#         await interaction.response.send_message(f"added contributor")
-#     elif len(contributors_to_add) > 1:
-#         await interaction.response.send_message(
-#             f"added {len(contributors_to_add)} contributors"
-#         )

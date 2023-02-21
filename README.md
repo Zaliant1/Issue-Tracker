@@ -14,7 +14,7 @@
 ```
 {
     _id: ObjectId(),
-    project_id: ObjectId(),
+    project_name: String,
     name: String,
     url: String
     guild_id: Int,
