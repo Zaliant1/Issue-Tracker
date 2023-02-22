@@ -104,12 +104,30 @@ async def update_contributors(request: Request):
         )
 
 
-@router.get("/project/{project_name}/issues")
-async def get_exact(project_name: str):
-    return utils.prepare_json(db.projects.find({"project_name": project_name}))
+@router.put("/project/{name}/categories")
+async def create_categories(request: Request, name: str):
+    req_info = await request.json()
+
+    project = db.project.find({"name": name})
+    if project:
+        for category in req_info:
+            db.projects.update_one(
+                {"name": name},
+                {"$push": {"categories": category.strip()}},
+            )
+    else:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Unable write to database",
+        )
 
 
-@router.get("/project/{project_id}/category/{category}/issues")
-async def get_all_by_category(project_name: str, category: str):
-    issues = list(db.issues.find({"project_name": project_name, "category": category}))
-    return utils.prepare_json(issues)
+# @router.get("/project/{project_name}/issues")
+# async def get_exact(project_name: str):
+#     return utils.prepare_json(db.projects.find({"project_name": project_name}))
+
+
+# @router.get("/project/{project_name}/category/{category}/issues")
+# async def get_all_by_category(project_name: str, category: str):
+#     issues = list(db.issues.find({"project_name": project_name, "category": category}))
+#     return utils.prepare_json(issues)

@@ -25,14 +25,14 @@ class NewIssue(ui.Modal):
 
     def __init__(
         self,
-        project_id: int,
+        project_name: str,
         issue_type: str,
         user_id: str,
         priority: str,
         *args,
         **kwargs,
     ):
-        self.project_id = project_id
+        self.project_name = project_name
         self.issue_type = issue_type
         self.user_id = user_id
         self.priority = priority
@@ -48,13 +48,13 @@ class NewIssue(ui.Modal):
             "priority": self.priority,
             "version": self.version.value,
             "description": self.description.value,
-            "modLogs": {
+            "modlogs": {
                 "title": "",
                 "body": "",
             },
             "archived": False,
-            "attachments": {"embedSource": "", "generalUrl": ""},
-            "project_id": self.project_id,
+            "attachments": {"embed_source": "", "general_url": ""},
+            "project_name": self.project_name,
             "user_id": self.user_id,
         }
 

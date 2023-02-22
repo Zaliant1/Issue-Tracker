@@ -5,8 +5,8 @@
 {
     _id: ObjectId(),
     name: String,
-    author: ObjectId(),
-    contibutors: List,
+    author_id: String,
+    contibutors: Array,
 }
 ```
 
@@ -18,8 +18,8 @@
     name: String,
     url: String
     guild_id: Int,
-    channel_id: Int
-    categories: List
+    channel_id: Int,
+    categories: Array
 }
 ```
 
@@ -27,11 +27,8 @@
 ```
 {
     _id: ObjectId(),
-    name: String,
     discord_id: String,
-    github: String,
-    projects: List,
-    roles: List
+    projects: Array,
 }
 ```
 
@@ -52,7 +49,7 @@
 ```
 {
     _id: ObjectId(),
-    project_id: Int,
+    project_name: String,
     user_id: String,
     version: String,
     summary: String,
@@ -62,13 +59,13 @@
     priority: "low" || "medium" || "high",
     status: "reported" || "in-progress" || "won't-fix" || "completed",
     archived: Boolean,
-    modLogs: {
+    modlogs: {
         title: String,
         body: String,
     },
     media: {
-        embedSource: String,
-        generalUrl: String
+        embed_source: String,
+        general_url: String
     }
 }
 ```
@@ -78,7 +75,7 @@
 ## /create-project
 *Description*
 Create a new project and add the message author as a contributor to the new project.
-Associates the discord guild with a project_id
+Associates the discord guild with a project_name
 
 *Parameters*
 `project_name`
@@ -109,18 +106,18 @@ Creates a webhook on the newly created channel for issue feed
 *Returns*
 new `project_name`
 new `channel_id`
-new `webhook_id` (unclear if this is possible)
+new `webhook_id`
 
 
 ### /add-contributor
 *Description*
-Assosiates a contributor to a project and will provide additional access to issue site
+Associates a contributor to a project and will provide additional access to issue site
 
 *Parameters*
 `project_name`
-`user_id` (@'ed value)
+`user_id`
 
 *Returns*
 new `project_name`
 new `channel_id`
-new `webhook_id` (unclear if this is possible)
+new `webhook_id`

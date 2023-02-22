@@ -5,17 +5,16 @@ from .. import webhooks
 import traceback
 
 router = APIRouter(prefix="/api")
+db = utils.get_db_client()
 
 
 @router.get("/issue/{issue_id}")
 async def get_exact(issue_id):
-    db = utils.get_db_client()
     return utils.prepare_json(db.issues.find_one({"_id": ObjectId(issue_id)}))
 
 
 @router.post("/issue/{issue_id}")
 async def update_issue(issue_id, request: Request):
-    db = utils.get_db_client()
     req_info = await request.json()
 
     issue_id = ObjectId(issue_id)
@@ -40,10 +39,9 @@ async def update_issue(issue_id, request: Request):
 
 @router.put("/issue")
 async def create_issue(request: Request):
-    db = utils.get_db_client()
     req_info = await request.json()
 
-    # TODO: check to see if user_id is allowed to create this issue on the project_id
+    # TODO: check to see if user_id is allowed to create this issue on the project_name
 
     try:
         issue = db.issues.insert_one(req_info)
@@ -57,15 +55,13 @@ async def create_issue(request: Request):
 
 @router.delete("/issue/{issue_id}")
 async def delete_issue(issue_id):
-    db = utils.get_db_client()
     issue = db.issues.find_one({"_id": ObjectId(issue_id)})
     db.issues.find_one_and_delete({"_id": ObjectId(issue_id)})
     webhooks.send_deleted_issue(issue)
 
 
-@router.post("/api/issue/findexact")
+@router.post("/issue/findexact/{issue_id}")
 async def get_exact(request: Request):
-    db = utils.get_db_client()
     req_info = await request.json()
     if req_info.get("_id"):
         del req_info["_id"]
