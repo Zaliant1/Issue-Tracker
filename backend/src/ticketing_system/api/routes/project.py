@@ -104,6 +104,26 @@ async def update_contributors(request: Request):
         )
 
 
+@router.get("/project/{name}/categories")
+async def create_categories(name: str):
+    project = db.projects.find_one({"name": name})
+    categories = []
+    # if project:
+    #     for category in project:
+    #         categories.append(category)
+
+    # else:
+    #     raise HTTPException(
+    #         status_code=503,
+    #         detail=f"Unable to retrieve categories from database",
+    #     )
+
+    ### find out why this is gives ###
+    # UnboundLocalError: cannot access local variable 'key' where it is not associated with a value
+
+    return utils.prepare_json(project)
+
+
 @router.put("/project/{name}/categories")
 async def create_categories(request: Request, name: str):
     req_info = await request.json()
