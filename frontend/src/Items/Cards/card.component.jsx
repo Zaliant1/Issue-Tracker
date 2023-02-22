@@ -224,10 +224,10 @@ export const IssueCard = (props) => {
         open={toggleModlogs}
         onClose={handleModlogsToggle}
       >
-        <DialogTitle>{issue.modLogs.title}</DialogTitle>
+        <DialogTitle>{issue.modlogs.title}</DialogTitle>
         <DialogContent>
           <DialogContentText component="pre">
-            {issue.modLogs.body}
+            {issue.modlogs.body}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -245,12 +245,12 @@ export const IssueCard = (props) => {
           <Box>
             <div
               dangerouslySetInnerHTML={{
-                __html: issue.attachments.embedSource,
+                __html: issue.attachments.embed_source,
               }}
             />
             <Button
               onClick={() =>
-                window.open(issue.attachments.generalUrl, "_blank")
+                window.open(issue.attachments.general_url, "_blank")
               }
             >
               Go to URL

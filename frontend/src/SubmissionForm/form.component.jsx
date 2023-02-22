@@ -34,17 +34,16 @@ export const UserForm = (props) => {
       category: "",
       type: "",
       priority: "",
-      playerName: "",
       version: "",
       description: "",
-      modLogs: {
+      modlogs: {
         title: "",
         body: "",
       },
       archived: false,
       attachments: {
-        embedSource: "",
-        generalUrl: "",
+        embed_source: "",
+        general_url: "",
       },
     }
   );
@@ -56,7 +55,7 @@ export const UserForm = (props) => {
       reader.onload = () => {
         setNewIssue({
           ...newIssue,
-          modLogs: { title: value.name, body: reader.result },
+          modlogs: { title: value.name, body: reader.result },
         });
         setModlogsButtonColor("success");
         setModlogsButtonText("Success!");
@@ -67,12 +66,12 @@ export const UserForm = (props) => {
     } else if (field === "attachmentsUrl") {
       setNewIssue({
         ...newIssue,
-        attachments: { ...newIssue.attachments, generalUrl: value },
+        attachments: { ...newIssue.attachments, general_url: value },
       });
     } else if (field === "attachmentsEmbedSource") {
       setNewIssue({
         ...newIssue,
-        attachments: { ...newIssue.attachments, embedSource: value },
+        attachments: { ...newIssue.attachments, embed_source: value },
       });
     } else {
       let issue = { ...newIssue };
@@ -84,7 +83,7 @@ export const UserForm = (props) => {
 
   useEffect(() => {
     if (
-      newIssue.attachments.generalUrl.match(
+      newIssue.attachments.general_url.match(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
       )
     ) {
@@ -95,7 +94,7 @@ export const UserForm = (props) => {
       setgeneralFieldColor("warning");
     }
 
-    if (newIssue.attachments.embedSource.includes("iframe")) {
+    if (newIssue.attachments.embed_source.includes("iframe")) {
       setEmbedHelperValidation("Valid Embed!");
       setEmbedFieldColor("success");
     } else {
@@ -105,58 +104,60 @@ export const UserForm = (props) => {
   }, [newIssue, submitFormColor, submitFormText]);
 
   const handleFormSubmit = async () => {
-    await axios.post("/api/issue/findexact", newIssue).then((res) => {
-      if (res.data) {
-        window.alert("this issue already exists");
-      } else {
-        try {
-          let promise;
-          if (props.isUpdate) {
-            promise = axios
-              .post(`/api/issue/${props.issue._id}`, newIssue)
-              .then(() => window.alert("issue updated!"));
-          } else {
-            promise = axios.put("/api/issue", newIssue);
-          }
-
-          promise.then(() => {
-            if (!props.onSubmit) {
-              setNewIssue({
-                status: "reported",
-                summary: "",
-                category: "",
-                type: "",
-                priority: "",
-                playerName: "",
-                version: "",
-                description: "",
-                modLogs: {
-                  title: "",
-                  body: "",
-                },
-                archived: false,
-                attachments: {
-                  embedSource: "",
-                  generalUrl: "",
-                },
-              });
-              setSubmitFormColor("success");
-              setSubmitFormText("Success!");
-              setTimeout(() => {
-                setSubmitFormColor("primary");
-                setSubmitFormText("Submit");
-                setModlogsButtonColor("primary");
-                setModlogsButtonText("Upload Modlogs");
-              }, 500);
+    await axios
+      .post(`/api/issue/findexact/${props.issue._id}`, newIssue)
+      .then((res) => {
+        if (res.data) {
+          window.alert("this issue already exists");
+        } else {
+          try {
+            let promise;
+            if (props.isUpdate) {
+              promise = axios
+                .post(`/api/issue/${props.issue._id}`, newIssue)
+                .then(() => window.alert("issue updated!"));
             } else {
-              props.onSubmit(newIssue);
+              promise = axios.put("/api/issue", newIssue);
             }
-          });
-        } catch (error) {
-          console.log(error);
+
+            promise.then(() => {
+              if (!props.onSubmit) {
+                setNewIssue({
+                  status: "reported",
+                  summary: "",
+                  category: "",
+                  type: "",
+                  priority: "",
+                  playerName: "",
+                  version: "",
+                  description: "",
+                  modlogs: {
+                    title: "",
+                    body: "",
+                  },
+                  archived: false,
+                  attachments: {
+                    embed_source: "",
+                    general_url: "",
+                  },
+                });
+                setSubmitFormColor("success");
+                setSubmitFormText("Success!");
+                setTimeout(() => {
+                  setSubmitFormColor("primary");
+                  setSubmitFormText("Submit");
+                  setModlogsButtonColor("primary");
+                  setModlogsButtonText("Upload Modlogs");
+                }, 500);
+              } else {
+                props.onSubmit(newIssue);
+              }
+            });
+          } catch (error) {
+            console.log(error);
+          }
         }
-      }
-    });
+      });
   };
 
   return (
