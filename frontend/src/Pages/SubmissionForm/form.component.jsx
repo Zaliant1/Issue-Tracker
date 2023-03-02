@@ -16,9 +16,9 @@ import {
 } from "@mui/material/";
 import RadioGroup from "@mui/material/RadioGroup";
 import SendIcon from "@mui/icons-material/Send";
-const Ticket = require("../db/db");
 
 export const UserForm = (props) => {
+  const [categories, setCategories] = useState([]);
   const [modlogsButtonColor, setModlogsButtonColor] = useState("primary");
   const [modlogsButtonText, setModlogsButtonText] = useState("Upload Modlogs");
   const [embedHelperValidation, setEmbedHelperValidation] = useState("");
@@ -49,7 +49,7 @@ export const UserForm = (props) => {
   );
 
   let updateNewIssue = (field, value) => {
-    if (field === "modLogs") {
+    if (field === "modlogs") {
       const reader = new FileReader();
       reader.readAsText(value);
       reader.onload = () => {
@@ -80,8 +80,13 @@ export const UserForm = (props) => {
       setNewIssue(issue);
     }
   };
-
   useEffect(() => {
+    if (!categories[0]) {
+      axios
+        .get(`api/project/Pale-Court/categories`)
+        .then((res) => setCategories(res.data));
+    }
+
     if (
       newIssue.attachments.general_url.match(
         /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
@@ -101,63 +106,60 @@ export const UserForm = (props) => {
       setEmbedHelperValidation("Please enter a valid embed link");
       setEmbedFieldColor("warning");
     }
-  }, [newIssue, submitFormColor, submitFormText]);
+  }, [newIssue, submitFormColor, submitFormText, categories]);
 
   const handleFormSubmit = async () => {
-    await axios
-      .post(`/api/issue/findexact/${props.issue._id}`, newIssue)
-      .then((res) => {
-        if (res.data) {
-          window.alert("this issue already exists");
-        } else {
-          try {
-            let promise;
-            if (props.isUpdate) {
-              promise = axios
-                .post(`/api/issue/${props.issue._id}`, newIssue)
-                .then(() => window.alert("issue updated!"));
-            } else {
-              promise = axios.put("/api/issue", newIssue);
-            }
-
-            promise.then(() => {
-              if (!props.onSubmit) {
-                setNewIssue({
-                  status: "reported",
-                  summary: "",
-                  category: "",
-                  type: "",
-                  priority: "",
-                  playerName: "",
-                  version: "",
-                  description: "",
-                  modlogs: {
-                    title: "",
-                    body: "",
-                  },
-                  archived: false,
-                  attachments: {
-                    embed_source: "",
-                    general_url: "",
-                  },
-                });
-                setSubmitFormColor("success");
-                setSubmitFormText("Success!");
-                setTimeout(() => {
-                  setSubmitFormColor("primary");
-                  setSubmitFormText("Submit");
-                  setModlogsButtonColor("primary");
-                  setModlogsButtonText("Upload Modlogs");
-                }, 500);
-              } else {
-                props.onSubmit(newIssue);
-              }
-            });
-          } catch (error) {
-            console.log(error);
+    await axios.post(`/api/issue/findexact`, newIssue).then((res) => {
+      if (res.data) {
+        window.alert("this issue already exists");
+      } else {
+        try {
+          let promise;
+          if (props.isUpdate) {
+            promise = axios
+              .post(`/api/issue/${props.issue._id}`, newIssue)
+              .then(() => window.alert("issue updated!"));
+          } else {
+            promise = axios.put("/api/issue", newIssue);
           }
+          promise.then(() => {
+            if (!props.onSubmit) {
+              setNewIssue({
+                status: "reported",
+                summary: "",
+                category: "",
+                type: "",
+                priority: "",
+                playerName: "",
+                version: "",
+                description: "",
+                modlogs: {
+                  title: "",
+                  body: "",
+                },
+                archived: false,
+                attachments: {
+                  embed_source: "",
+                  general_url: "",
+                },
+              });
+              setSubmitFormColor("success");
+              setSubmitFormText("Success!");
+              setTimeout(() => {
+                setSubmitFormColor("primary");
+                setSubmitFormText("Submit");
+                setModlogsButtonColor("primary");
+                setModlogsButtonText("Upload Modlogs");
+              }, 500);
+            } else {
+              props.onSubmit(newIssue);
+            }
+          });
+        } catch (error) {
+          console.log(error);
         }
-      });
+      }
+    });
   };
 
   return (
@@ -182,24 +184,23 @@ export const UserForm = (props) => {
                 <TextField
                   id="category-select"
                   label="Category"
-                  value={newIssue.category}
+                  value={newIssue.category
+                    .toLowerCase()
+                    .replace(" ", "-")
+                    .replace("&", "-")}
                   select
                   fullWidth
                   sx={{ pb: 2 }}
                   onChange={(e) => updateNewIssue("category", e.target.value)}
                 >
-                  <MenuItem value="none">
+                  <MenuItem defaultValue="none">
                     <em>None</em>
                   </MenuItem>
-                  <MenuItem value="zemer">Zemer</MenuItem>
-                  <MenuItem value="dryya">Dryya</MenuItem>
-                  <MenuItem value="hegemol">Hegemol</MenuItem>
-                  <MenuItem value="isma">Isma</MenuItem>
-                  <MenuItem value="charms">Charms</MenuItem>
-                  <MenuItem value="champions-call">Champions Call</MenuItem>
-                  <MenuItem value="base-game">Base Game</MenuItem>
-                  <MenuItem value="menu">Menu</MenuItem>
-                  <MenuItem value="technical">Technical</MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
                 </TextField>
               </Grid>
               <Grid item md={12}>
@@ -365,7 +366,7 @@ export const UserForm = (props) => {
                 hidden
                 accept="text/*"
                 type="file"
-                onChange={(e) => updateNewIssue("modLogs", e.target.files[0])}
+                onChange={(e) => updateNewIssue("modlogs", e.target.files[0])}
               />
             </Button>
           </Grid>

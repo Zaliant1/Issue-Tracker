@@ -2,7 +2,7 @@
 name = "ticketing-system"
 version = "0.1.0"
 description = ""
-authors = ["Zaliant1 <ATMendoza1092@gmail.com>"]
+authors = ["Zaliant1 <zalianthx@gmail.com>"]
 packages = []
 
 [tool.poetry.dependencies]

@@ -2,6 +2,7 @@ import discord
 import os
 from discord import Color
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -11,6 +12,13 @@ webhook = discord.SyncWebhook.from_url(os.getenv("WEBHOOK_URL"))
 
 def create_embed(message, color, title):
     return discord.Embed(title=title, description=message, color=color)
+
+
+def modding_help():
+    with open("src/ticketing_system/api/embeds/mod_help.md") as target:
+        message = target.read()
+        embed = discord.Embed(description=message, color=Color.blurple())
+        webhook.send(embed=embed)
 
 
 def create_new_issue_embed(issue):

@@ -15,26 +15,26 @@ import {
 } from "@mui/material";
 import { UserForm } from "../SubmissionForm/form.component";
 
-export const IssuePage = () => {
+export const ProjectPage = () => {
   let params = useParams();
   let navigate = useNavigate();
-  let [issue, setIssue] = useState(null);
-  let [editIssue, setEditIssue] = useState({ issue: null, toggle: false });
-  console.log(params);
+  let [project, setProject] = useState(null);
+  let [editProject, setEditProject] = useState({
+    project: null,
+    toggle: false,
+  });
 
   useEffect(() => {
-    if (issue === null) {
-      axios
-        .get(`/api/issue/${params.issueId}`)
-        .then((res) => setIssue(res.data));
+    if (project === null) {
+      axios.get(`/api/projects/`).then((res) => setProject(res.data));
     }
   });
 
-  const toggleEdit = (issue) => {
-    setEditIssue({ issue: issue, toggle: !editIssue.toggle });
+  const toggleEdit = (project) => {
+    setEditProject({ project: project, toggle: !editProject.toggle });
   };
 
-  if (!issue) {
+  if (!project) {
     return (
       <div
         style={{
@@ -52,21 +52,19 @@ export const IssuePage = () => {
   return (
     <div>
       <Grid container>
-        <Grid item md={12} key={`${JSON.stringify(issue)}`}>
+        <Grid item md={12} key={`${JSON.stringify(project)}`}>
           <IssueCard
-            issue={issue}
-            toggleEdit={(issue) => toggleEdit(issue)}
+            project={project}
+            toggleEdit={(project) => toggleEdit(project)}
             onDelete={() =>
-              axios
-                .get(`/api/category/${params.category}/issues`)
-                .then((res) => navigate("/"))
+              axios.get(`/api/projects`).then((res) => navigate("/"))
             }
           />
         </Grid>
       </Grid>
       <Dialog
-        open={editIssue.toggle}
-        onClose={() => setEditIssue({ issue: null, toggle: false })}
+        open={editProject.toggle}
+        onClose={() => setEditProject({ project: null, toggle: false })}
         fullWidth
         maxWidth="xl"
       >
@@ -75,13 +73,13 @@ export const IssuePage = () => {
           <Grid container sx={{ pt: 1 }}>
             <Grid item>
               <UserForm
-                issue={editIssue.issue || {}}
+                project={editProject.project || {}}
                 isUpdate={true}
                 onSubmit={() => {
-                  setEditIssue({ issue: null, toggle: false });
+                  setEditProject({ project: null, toggle: false });
                   axios
-                    .get(`/api/category/${params.category}/issues`)
-                    .then((res) => setIssue(res.data));
+                    .get(`/api/projects`)
+                    .then((res) => setProject(res.data));
                 }}
               />
             </Grid>

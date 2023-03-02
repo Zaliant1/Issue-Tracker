@@ -9,8 +9,17 @@ db = utils.get_db_client()
 
 
 @router.get("/issue/{issue_id}")
-async def get_exact(issue_id):
+async def get_one(issue_id):
     return utils.prepare_json(db.issues.find_one({"_id": ObjectId(issue_id)}))
+
+
+@router.post("/issue/findexact")
+async def get_exact(request: Request):
+    req_info = await request.json()
+    if req_info.get("_id"):
+        del req_info["_id"]
+
+    return utils.prepare_json(db.issues.find_one(req_info))
 
 
 @router.post("/issue/{issue_id}")
@@ -58,12 +67,3 @@ async def delete_issue(issue_id):
     issue = db.issues.find_one({"_id": ObjectId(issue_id)})
     db.issues.find_one_and_delete({"_id": ObjectId(issue_id)})
     webhooks.send_deleted_issue(issue)
-
-
-@router.post("/issue/findexact/{issue_id}")
-async def get_exact(request: Request):
-    req_info = await request.json()
-    if req_info.get("_id"):
-        del req_info["_id"]
-
-    return utils.prepare_json(db.issues.find_one(req_info))

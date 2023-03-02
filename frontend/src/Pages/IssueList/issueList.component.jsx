@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { IssueCard } from "../../Items/Cards/card.component";
+import { IssueCard } from "../../Items/Cards/issueCard.component";
 import { toTitleCase } from "../../utils";
 
 import {
@@ -16,13 +16,15 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import { UserForm } from "../../SubmissionForm/form.component";
+import { UserForm } from "../SubmissionForm/form.component.jsx";
 
 export const IssueCardList = () => {
   let params = useParams();
   let [searchParams, setSearchParams] = useSearchParams();
   let [issues, setIssues] = useState(null);
   let [editIssue, setEditIssue] = useState({ issue: null, toggle: false });
+
+  console.log(issues);
 
   const [filterByStatus, setFilterByStatus] = useState();
   const [filterByType, setFilterByType] = useState();
@@ -31,7 +33,7 @@ export const IssueCardList = () => {
   useEffect(() => {
     if (issues === null) {
       axios
-        .get(`/api/issue/category/${params.category}`)
+        .get(`/api/project/Pale-Court/category/${params.category}/issues`)
         .then((res) => setIssues(res.data));
     }
   });
@@ -39,7 +41,7 @@ export const IssueCardList = () => {
   useEffect(() => {
     if (issues) {
       axios
-        .get(`/api/issue/category/${params.category}`)
+        .get(`/api/project/Pale-Court/category/${params.category}/issues`)
         .then((res) => setIssues(res.data));
     }
   }, [params.category]); // eslint-disable-line
@@ -94,7 +96,9 @@ export const IssueCardList = () => {
                   toggleEdit={(issue) => toggleEdit(issue)}
                   onDelete={() =>
                     axios
-                      .get(`/api/issue/category/${params.category}`)
+                      .get(
+                        `/api/project/Pale-Court/category/${params.category}/issues`
+                      )
                       .then((res) => setIssues(res.data))
                   }
                 />
@@ -118,7 +122,9 @@ export const IssueCardList = () => {
                 onSubmit={() => {
                   setEditIssue({ issue: null, toggle: false });
                   axios
-                    .get(`/api/issue/category/${params.category}`)
+                    .get(
+                      `/api/project/Pale-Court/category/${params.category}/issues`
+                    )
                     .then((res) => setIssues(res.data));
                 }}
               />

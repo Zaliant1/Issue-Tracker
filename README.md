@@ -28,7 +28,7 @@
 {
     _id: ObjectId(),
     discord_id: String,
-    projects: Array,
+    projects: [project_name: project_role],
 }
 ```
 

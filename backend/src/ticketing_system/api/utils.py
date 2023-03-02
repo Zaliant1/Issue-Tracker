@@ -3,18 +3,22 @@ import pymongo
 from dotenv import load_dotenv
 from bson import ObjectId
 from urllib.parse import quote_plus
-import re
 
 load_dotenv()
 
 
 def alphanumeric_check(data):
-    re.search([letter for letter in data.split("")], "(\w+\s\w+)")
+    if data.replace(" ", "").isalnum():
+        data.replace(" ", "-")
+    else:
+        return False
 
 
 def json_ready(data):
     if isinstance(data, ObjectId):
         return str(data)
+    # elif instance(data, datetime.datetime):
+    #     return str(data)
     else:
         return data
 
@@ -23,20 +27,28 @@ def prepare_json(data):
     if isinstance(data, dict):
         output = {}
         for key, value in data.items():
-            if isinstance(value, dict) or isinstance(value, list):
+            if (
+                isinstance(value, dict)
+                or isinstance(value, list)
+                or isinstance(value, set)
+            ):
                 output[key] = prepare_json(value)
             else:
                 output[key] = json_ready(value)
 
         return output
 
-    elif isinstance(data, list):
+    elif isinstance(data, list) or isinstance(data, set):
         output = []
         for value in data:
-            if isinstance(value, dict) or isinstance(value, list):
+            if (
+                isinstance(value, dict)
+                or isinstance(value, list)
+                or isinstance(value, set)
+            ):
                 output.append(prepare_json(value))
             else:
-                output[key] = json_ready(value)
+                output.append(json_ready(value))
 
         return output
     else:

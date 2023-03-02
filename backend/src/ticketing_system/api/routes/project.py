@@ -23,7 +23,7 @@ async def get_project(project_name):
 
 
 @router.put("/project")
-async def get_project(request: Request):
+async def create_project(request: Request):
     req_info = await request.json()
 
     find_project = db.projects.find_one({"name": req_info["name"]})
@@ -51,7 +51,7 @@ async def get_project(request: Request):
 
 
 @router.put("/project/webhooks")
-async def get_project(request: Request):
+async def create_project_webhook(request: Request):
     req_info = await request.json()
     proj_name = req_info["project_name"]
     time.sleep(0.5)
@@ -107,21 +107,14 @@ async def update_contributors(request: Request):
 @router.get("/project/{name}/categories")
 async def create_categories(name: str):
     project = db.projects.find_one({"name": name})
-    categories = []
-    # if project:
-    #     for category in project:
-    #         categories.append(category)
 
-    # else:
-    #     raise HTTPException(
-    #         status_code=503,
-    #         detail=f"Unable to retrieve categories from database",
-    #     )
+    if not project:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Unable to retrieve categories from database",
+        )
 
-    ### find out why this is gives ###
-    # UnboundLocalError: cannot access local variable 'key' where it is not associated with a value
-
-    return utils.prepare_json(project)
+    return utils.prepare_json(project["categories"])
 
 
 @router.put("/project/{name}/categories")
@@ -142,12 +135,25 @@ async def create_categories(request: Request, name: str):
         )
 
 
-# @router.get("/project/{project_name}/issues")
-# async def get_exact(project_name: str):
-#     return utils.prepare_json(db.projects.find({"project_name": project_name}))
+@router.get("/projects/")
+async def get_all_projects():
+    projects = list(db.projects.find())
+    return utils.prepare_json(projects)
 
 
-# @router.get("/project/{project_name}/category/{category}/issues")
-# async def get_all_by_category(project_name: str, category: str):
-#     issues = list(db.issues.find({"project_name": project_name, "category": category}))
+# @router.get("/project/{name}/issues")
+# async def get_exact(name: str):
+#     return utils.prepare_json(db.projects.find({"name": name}))
+
+
+@router.get("/project/{project_name}/category/{category}/issues")
+async def get_all_by_category(project_name: str, category: str):
+    # issues = list(db.issues.find({"project_name": project_name, "category": category}))
+    issues = list(db.issues.find({"category": category}))
+    return utils.prepare_json(issues)
+
+
+# @router.get("/category/{category}/issues")
+# async def get_all_by_category(category: str):
+#     issues = list(db.issues.find({"category": category}))
 #     return utils.prepare_json(issues)
