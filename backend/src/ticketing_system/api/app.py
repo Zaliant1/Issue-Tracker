@@ -18,3 +18,9 @@ async def root():
 @app.get("/modding-help")
 async def modding_help_send():
     return webhooks.modding_help()
+
+
+@app.post("api/auth/")
+async def get_auth_info(request: Request):
+    req_info = await request.json()
+    print(req_info)

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 import {
@@ -21,8 +22,13 @@ const drawerWidth = 240;
 
 export const Header = () => {
   const [categories, setCategories] = useState([]);
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  let code = searchParams.get("code");
+
   const navigate = useNavigate();
   const location = useLocation();
+  let params = useParams();
 
   useEffect(() => {
     if (!categories[0]) {
@@ -32,7 +38,14 @@ export const Header = () => {
     }
   }, [categories]);
 
-  console.log(categories);
+  console.log(location.pathname);
+  console.log(code);
+
+  // if (location.pathname.includes("code")) {
+  //   console.log(params);
+  //   console.log("hi");
+  //   // axios.post(`/api/auth`);
+  // }
 
   if (location.pathname.includes("/projects")) {
     return (
