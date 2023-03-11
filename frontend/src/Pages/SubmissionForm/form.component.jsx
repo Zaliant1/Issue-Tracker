@@ -184,14 +184,13 @@ export const UserForm = (props) => {
                 <TextField
                   id="category-select"
                   label="Category"
-                  value={newIssue.category
-                    .toLowerCase()
-                    .replace(" ", "-")
-                    .replace("&", "-")}
+                  value={newIssue.category.replace(" ", "-").replace("&", "-")}
                   select
                   fullWidth
                   sx={{ pb: 2 }}
-                  onChange={(e) => updateNewIssue("category", e.target.value)}
+                  onChange={(e) =>
+                    updateNewIssue("category", e.target.value.toLowerCase())
+                  }
                 >
                   <MenuItem defaultValue="none">
                     <em>None</em>
