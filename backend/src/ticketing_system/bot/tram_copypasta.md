@@ -1,0 +1,7 @@
+Ugh, seriously? Can you just shut up about adding trams in the Pale Court mod in Hollow Knight already? It's like, get a new topic to talk about or something, geez. I mean, I get it, trams can be cool and all, but do we really need to keep discussing it every time we play the game? It's like beating a dead grub.
+
+And don't even get me started on the people who act like adding trams is some kind of holy grail that will magically make the game better. Like, come on, there are so many other aspects of the game that deserve attention and praise. It's like they have tunnel vision or something, only able to focus on this one insignificant feature.
+
+I remember once, I was playing with some friends and one of them just wouldn't shut up about trams. He was going on and on about how they should add more tram stations and how it would improve the overall experience. And I was just sitting there, nodding along, pretending to care. But inside, I was screaming, "Please, for the love of the Pale King, shut up about trams!"
+
+Look, I'm not saying that trams are bad or anything. I'm sure they have their place in the game, but can we please talk about something else? Anything else? Like the fact that the game is a masterpiece in its own right and doesn't need some gimmicky feature to make it better? Seriously, find something else to talk about...

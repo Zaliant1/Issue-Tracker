@@ -115,12 +115,18 @@ export const UserForm = (props) => {
       } else {
         try {
           let promise;
+          let updatedIssue = {
+            ...newIssue,
+            category: newIssue.category.toLowerCase(),
+          };
           if (props.isUpdate) {
             promise = axios
-              .post(`/api/issue/${props.issue._id}`, newIssue)
+              .post(`/api/issue/${props.issue._id}`, updatedIssue)
               .then(() => window.alert("issue updated!"));
           } else {
-            promise = axios.put("/api/issue", newIssue);
+            console.log(updatedIssue);
+
+            promise = axios.put("/api/issue", updatedIssue);
           }
           promise.then(() => {
             if (!props.onSubmit) {
@@ -184,13 +190,11 @@ export const UserForm = (props) => {
                 <TextField
                   id="category-select"
                   label="Category"
-                  value={newIssue.category.replace(" ", "-").replace("&", "-")}
+                  value={newIssue.category}
                   select
                   fullWidth
                   sx={{ pb: 2 }}
-                  onChange={(e) =>
-                    updateNewIssue("category", e.target.value.toLowerCase())
-                  }
+                  onChange={(e) => updateNewIssue("category", e.target.value)}
                 >
                   <MenuItem defaultValue="none">
                     <em>None</em>

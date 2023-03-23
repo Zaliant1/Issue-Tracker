@@ -24,8 +24,6 @@ export const IssueCardList = () => {
   let [issues, setIssues] = useState(null);
   let [editIssue, setEditIssue] = useState({ issue: null, toggle: false });
 
-  console.log(issues);
-
   const [filterByStatus, setFilterByStatus] = useState();
   const [filterByType, setFilterByType] = useState();
   const archived = searchParams.get("archived") === "true";

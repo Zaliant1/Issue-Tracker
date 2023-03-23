@@ -38,9 +38,6 @@ export const Header = () => {
     }
   }, [categories]);
 
-  console.log(location.pathname);
-  console.log(code);
-
   // if (location.pathname.includes("code")) {
   //   console.log(params);
   //   console.log("hi");

@@ -12,10 +12,6 @@ class IssueProject(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready(self):
-        print("issue project cog loaded")
-
-    @commands.Cog.listener()
     async def on_guild_join(self, guild):
         self.bot.tree.copy_global_to(guild=guild)
 
@@ -32,7 +28,7 @@ class IssueProject(commands.Cog):
     @commands.command(name="risto")
     async def risto(self, ctx: commands.Context) -> None:
         await ctx.send(
-            f"https://cdn.discordapp.com/attachments/825530277694144542/1077734017790656583/image.png"
+            "https://cdn.discordapp.com/attachments/825530277694144542/1077734017790656583/image.png"
         )
 
     # Adds an issue
@@ -294,3 +290,8 @@ class IssueProject(commands.Cog):
                 f"created project, channels, and webhook, but had an issue writing the webhook to the database {response.status_code}",
                 ephemeral=True,
             )
+
+
+async def setup(bot):
+    await bot.add_cog(IssueProject(bot=bot))
+    print("cog added")
