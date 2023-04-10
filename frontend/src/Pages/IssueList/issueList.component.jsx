@@ -6,6 +6,7 @@ import { IssueCard } from "../../Items/Cards/issueCard.component";
 import { toTitleCase } from "../../utils";
 
 import {
+  Typography,
   Grid,
   FormGroup,
   FormControlLabel,
@@ -65,8 +66,8 @@ export const IssueCardList = () => {
 
   return (
     <div>
-      <FormGroup>
-        <FormControlLabel
+      <Typography>
+        <Switch
           onChange={(e) => {
             if (!archived) {
               setSearchParams({ archived: true });
@@ -76,9 +77,11 @@ export const IssueCardList = () => {
           }}
           control={<Switch />}
           checked={archived}
-          label="Archived"
+          name="Archived"
         />
-      </FormGroup>
+        Archived
+      </Typography>
+
       <Grid container spacing={2}>
         {issues
           .filter(

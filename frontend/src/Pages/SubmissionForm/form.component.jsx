@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { UserContext } from "../../context/authprovider.component";
 import axios from "axios";
 
 import {
@@ -13,11 +13,16 @@ import {
   Stack,
   Grid,
   Alert,
+  AlertTitle,
+  CircularProgress,
+  IconButton,
 } from "@mui/material/";
 import RadioGroup from "@mui/material/RadioGroup";
 import SendIcon from "@mui/icons-material/Send";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 export const UserForm = (props) => {
+  const tokenInfo = useContext(UserContext);
   const [categories, setCategories] = useState([]);
   const [modlogsButtonColor, setModlogsButtonColor] = useState("primary");
   const [modlogsButtonText, setModlogsButtonText] = useState("Upload Modlogs");
@@ -168,7 +173,43 @@ export const UserForm = (props) => {
     });
   };
 
-  return (
+  console.log(tokenInfo);
+  return !tokenInfo ? (
+    <div>
+      <Alert severity="warning">
+        <AlertTitle>Cannot Submit Form</AlertTitle>
+        You cannot submit a form —{" "}
+        <strong>
+          Please login{" "}
+          <a href="https://discord.com/api/oauth2/authorize?client_id=1074939657902637058&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000&response_type=code&scope=identify">
+            here{" "}
+          </a>
+          to be able to submit a form for this project
+        </strong>
+        <br></br>
+        <Grid container>
+          <h3>
+            If you are already logged in and are still seeing this, try
+            refreshing the page
+          </h3>
+
+          <IconButton onClick={() => window.location.reload()} color="primary">
+            <RefreshIcon />
+          </IconButton>
+        </Grid>
+      </Alert>
+      <div
+        style={{
+          position: "absolute",
+          left: "55%",
+          top: "52%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    </div>
+  ) : (
     <div>
       <FormControl>
         <Grid container spacing={3}>
@@ -212,6 +253,7 @@ export const UserForm = (props) => {
                   label="Player"
                   variant="standard"
                   value={newIssue.playerName}
+                  defaultValue={tokenInfo.username}
                   onChange={(e) => updateNewIssue("playerName", e.target.value)}
                   sx={{ pb: 2 }}
                   fullWidth

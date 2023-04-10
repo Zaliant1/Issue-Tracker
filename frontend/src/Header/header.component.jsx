@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { UserContext } from "../context/authprovider.component";
+import {
+  Outlet,
+  useLocation,
+  useParams,
+  useSearchParams,
+  useNavigate,
+} from "react-router-dom";
+
 import axios from "axios";
 
 import {
+  Avatar,
   Box,
   Drawer,
   AppBar,
@@ -16,19 +25,49 @@ import {
   Fab,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import LoginIcon from "@mui/icons-material/Login";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const drawerWidth = 240;
+const theme = createTheme({
+  palette: {
+    discord: {
+      main: "#5865F2",
+    },
+  },
+});
 
 export const Header = () => {
   const [categories, setCategories] = useState([]);
-  let [searchParams, setSearchParams] = useSearchParams();
-
-  let code = searchParams.get("code");
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [userData, setUserData] = useState();
   const navigate = useNavigate();
   const location = useLocation();
   let params = useParams();
+
+  let code = searchParams.get("code");
+  if (code) {
+    axios.post(`/api/user/discord/${code}`).then((res) => {
+      if (res.data) {
+        localStorage.setItem("user_auth", JSON.stringify(res.data));
+        axios
+          .get("https://discord.com/api/v8/users/@me", {
+            headers: {
+              Authorization: `Bearer ${res.data.access_token}`,
+            },
+          })
+          .then((discordRes) => {
+            setUserData(discordRes.data);
+            localStorage.setItem("user_info", JSON.stringify(discordRes.data));
+            navigate("/");
+          });
+      }
+    });
+  }
+
+  if (!userData && localStorage.getItem(["user_info"])) {
+    setUserData(JSON.parse(localStorage.getItem(["user_info"])));
+  }
 
   useEffect(() => {
     if (!categories[0]) {
@@ -37,12 +76,6 @@ export const Header = () => {
         .then((res) => setCategories(res.data));
     }
   }, [categories]);
-
-  // if (location.pathname.includes("code")) {
-  //   console.log(params);
-  //   console.log("hi");
-  //   // axios.post(`/api/auth`);
-  // }
 
   if (location.pathname.includes("/projects")) {
     return (
@@ -57,10 +90,40 @@ export const Header = () => {
               Project Management
             </Typography>
 
-            <Fab variant="extended" onClick={() => navigate("/form")}>
+            <Fab
+              variant="extended"
+              onClick={() => navigate("/form")}
+              sx={{ margin: 1 }}
+            >
               Project
               <AddIcon />
             </Fab>
+            {userData ? (
+              <ThemeProvider theme={theme}>
+                <Fab
+                  color="discord"
+                  variant="circular"
+                  onClick={() => navigate(`/user/${userData.id}`)}
+                >
+                  <Avatar
+                    src={`https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`}
+                    alt={userData.username}
+                    sx={{ width: 50, height: 50 }}
+                  />
+                </Fab>
+              </ThemeProvider>
+            ) : (
+              <ThemeProvider theme={theme}>
+                <Fab
+                  color="discord"
+                  variant="extended"
+                  href="https://discord.com/api/oauth2/authorize?client_id=1074939657902637058&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000&response_type=code&scope=identify"
+                >
+                  Discord Login
+                  <LoginIcon sx={{ pl: 0.5 }} />
+                </Fab>
+              </ThemeProvider>
+            )}
           </Toolbar>
         </AppBar>
         <Toolbar />
@@ -83,10 +146,44 @@ export const Header = () => {
               Project Management
             </Typography>
 
-            <Fab variant="extended" onClick={() => navigate("/form")}>
-              Issue
-              <AddIcon />
-            </Fab>
+            {userData ? (
+              <div>
+                <Fab
+                  variant="extended"
+                  onClick={() => navigate("/form")}
+                  sx={{ margin: 1 }}
+                >
+                  Issue
+                  <AddIcon sx={{ pl: 0.5 }} />
+                </Fab>
+                <ThemeProvider theme={theme}>
+                  <Fab
+                    color="discord"
+                    variant="circular"
+                    onClick={() => navigate(`/user/${userData.id}`)}
+                  >
+                    <Avatar
+                      src={`https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`}
+                      alt={userData.username}
+                      sx={{ width: 50, height: 50 }}
+                    />
+                  </Fab>
+                </ThemeProvider>
+              </div>
+            ) : (
+              <div>
+                <ThemeProvider theme={theme}>
+                  <Fab
+                    color="discord"
+                    variant="extended"
+                    href="https://discord.com/api/oauth2/authorize?client_id=1074939657902637058&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000&response_type=code&scope=identify"
+                  >
+                    Discord Login
+                    <LoginIcon sx={{ pl: 0.5 }} />
+                  </Fab>
+                </ThemeProvider>
+              </div>
+            )}
           </Toolbar>
         </AppBar>
         <Drawer

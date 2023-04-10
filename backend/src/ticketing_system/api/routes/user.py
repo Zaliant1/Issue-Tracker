@@ -2,11 +2,36 @@ from fastapi import APIRouter, Request, HTTPException
 from bson import ObjectId
 from .. import utils
 from .. import webhooks
+from dotenv import load_dotenv
+import os
+import requests
 import traceback
 import time
 
+SECRET = os.getenv("CLIENT_SECRET")
+APP_ID = os.getenv("APPLICATION_ID")
 router = APIRouter(prefix="/api")
 db = utils.get_db_client()
+load_dotenv()
+
+
+@router.post("/user/discord/{code}")
+async def get_code_run_exchange(code):
+    data = {
+        "client_id": APP_ID,
+        "client_secret": SECRET,
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": "http://127.0.0.1:3000",
+    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    r = requests.post(
+        "https://discord.com/api/v8/oauth2/token",
+        data=data,
+        headers=headers,
+    )
+    r.raise_for_status()
+    return r.json()
 
 
 @router.put("/user/create")
