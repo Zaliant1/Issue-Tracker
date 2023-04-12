@@ -1,3 +1,24 @@
+## Roles
+### **Role Types**
+
+`admin`
+`maintainer`
+`contributor`
+
+### Admin
+
+- Add / remove `maintainers` and `contributors`
+- Has full CRUD on any issue
+- Can delete project
+  
+### Maintainer
+- Has full CRUD on any issue
+
+### Contributor
+- Can Create an issue
+- Can only Update or Delete issue where they are the author
+
+
 ## Data Structures
 
 ### Project
@@ -31,12 +52,6 @@
     projects: [project_name: project_role],
 }
 ```
-
-### Role
-*Types*
-`author`
-`contributor`
-
 
 ```
 {
