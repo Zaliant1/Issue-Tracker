@@ -39,6 +39,11 @@ export const UserForm = (props) => {
       category: "",
       type: "",
       priority: "",
+      playerData: {
+        name: !tokenInfo.username ? "" : tokenInfo.username,
+        id: !tokenInfo.id ? "" : tokenInfo.id,
+        avatar: !tokenInfo.avatar ? "" : tokenInfo.avatar,
+      },
       version: "",
       description: "",
       modlogs: {
@@ -126,12 +131,11 @@ export const UserForm = (props) => {
           };
           if (props.isUpdate) {
             promise = axios
-              .post(`/api/issue/${props.issue._id}`, updatedIssue)
+              .put(`/api/issue/${props.issue._id}`, updatedIssue)
               .then(() => window.alert("issue updated!"));
           } else {
+            promise = axios.post("/api/issue", updatedIssue);
             console.log(updatedIssue);
-
-            promise = axios.put("/api/issue", updatedIssue);
           }
           promise.then(() => {
             if (!props.onSubmit) {
@@ -141,7 +145,11 @@ export const UserForm = (props) => {
                 category: "",
                 type: "",
                 priority: "",
-                playerName: "",
+                playerData: {
+                  name: !tokenInfo.username ? "" : tokenInfo.username,
+                  id: !tokenInfo.id ? "" : tokenInfo.id,
+                  avatar: !tokenInfo.avatar ? "" : tokenInfo.avatar,
+                },
                 version: "",
                 description: "",
                 modlogs: {
@@ -173,7 +181,7 @@ export const UserForm = (props) => {
     });
   };
 
-  console.log(tokenInfo);
+  console.log(newIssue.playerData);
   return !tokenInfo ? (
     <div>
       <Alert severity="warning">
@@ -252,7 +260,7 @@ export const UserForm = (props) => {
                   id="player-name"
                   label="Player"
                   variant="standard"
-                  value={newIssue.playerName}
+                  value={newIssue.playerData.name}
                   defaultValue={tokenInfo.username}
                   onChange={(e) => updateNewIssue("playerName", e.target.value)}
                   sx={{ pb: 2 }}

@@ -14,14 +14,11 @@ def create_embed(message, color, title):
     return discord.Embed(title=title, description=message, color=color)
 
 
-def modding_help():
-    with open("src/ticketing_system/api/embeds/mod_help.md") as target:
-        message = target.read()
-        embed = discord.Embed(description=message, color=Color.blurple())
-        webhook.send(embed=embed)
+def send_new_issue(issue):
+    discord_id = issue["playerData"]["id"]
+    discord_name = issue["playerData"]["name"]
+    discord_avatar_id = issue["playerData"]["avatar"]
 
-
-def create_new_issue_embed(issue):
     if issue["type"] == "bug":
         color = Color.red()
     else:
@@ -34,22 +31,30 @@ def create_new_issue_embed(issue):
     embed.add_field(name="Category", value=issue["category"], inline=True)
     embed.add_field(name="Version", value=issue["version"], inline=True)
 
-    return embed
+    embed.set_author(
+        name=discord_name,
+        icon_url=f"https://cdn.discordapp.com/avatars/{discord_id}/{discord_avatar_id}.png",
+    )
 
-
-def send_new_issue(issue):
-    embed = create_new_issue_embed(issue)
     webhook.send("**New Issue Created**", embed=embed)
 
 
-def send_update_issue(diff, issue_id):
-    description = (
-        f"[click here to see issue in website](http://localhost:3000/issue/{issue_id})"
-    )
+def send_update_issue(diff, issue):
+    description = f"[click here to see issue in website](http://localhost:3000/issue/{issue['_id']})"
     ignored_update_list = []
     message_list = []
+    discord_id = issue["playerData"]["id"]
+    discord_name = issue["playerData"]["name"]
+    discord_avatar_id = issue["playerData"]["avatar"]
+
     embed = discord.Embed(
-        title="Issue Updated!", description=description, color=Color.blurple()
+        title="Issue Updated!",
+        description=description,
+        color=Color.blurple(),
+    )
+    embed.set_author(
+        name=discord_name,
+        icon_url=f"https://cdn.discordapp.com/avatars/{discord_id}/{discord_avatar_id}.png",
     )
 
     for i in diff:
@@ -104,15 +109,22 @@ def send_update_issue(diff, issue_id):
 
 
 def send_deleted_issue(issue):
-    title = "Issue Deleted"
+    discord_id = issue["playerData"]["id"]
+    discord_name = issue["playerData"]["name"]
+    discord_avatar_id = issue["playerData"]["avatar"]
+
     color = Color.red()
 
-    message = f"""
-        Type: {issue['type']}
-        Category: {issue['category']}
-        Summary: {issue['summary']}
-        Version: {issue['version']}
-        Player Name: {issue['playerName']}
-        """
-    embed = create_embed(title=title, message=message, color=color)
-    webhook.send(embed=embed)
+    embed = discord.Embed(color=color)
+
+    embed.add_field(name="Summary", value=issue["summary"], inline=False)
+    embed.add_field(name="Player", value=issue["playerData"]["name"], inline=True)
+    embed.add_field(name="Type", value=issue["type"], inline=False)
+    embed.add_field(name="Category", value=issue["category"], inline=True)
+    embed.add_field(name="Version", value=issue["version"], inline=True)
+
+    embed.set_author(
+        name=discord_name,
+        icon_url=f"https://cdn.discordapp.com/avatars/{discord_id}/{discord_avatar_id}.png",
+    )
+    webhook.send("**Issue Deleted**", embed=embed)

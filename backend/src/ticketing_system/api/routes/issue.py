@@ -22,7 +22,7 @@ async def get_exact(request: Request):
     return utils.prepare_json(db.issues.find_one(req_info))
 
 
-@router.post("/issue/{issue_id}")
+@router.put("/issue/{issue_id}")
 async def update_issue(issue_id, request: Request):
     req_info = await request.json()
 
@@ -41,12 +41,12 @@ async def update_issue(issue_id, request: Request):
 
         diff.append({"new": value, "old": issue[key], "key": key})
 
-    webhooks.send_update_issue(diff, issue_id)
+    webhooks.send_update_issue(diff, issue)
 
     return utils.prepare_json(issue)
 
 
-@router.put("/issue")
+@router.post("/issue")
 async def create_issue(request: Request):
     req_info = await request.json()
 
