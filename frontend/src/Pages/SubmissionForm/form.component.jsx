@@ -22,7 +22,7 @@ import SendIcon from "@mui/icons-material/Send";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 export const UserForm = (props) => {
-  const tokenInfo = useContext(UserContext);
+  const { tokenInfo } = useContext(UserContext);
   const [categories, setCategories] = useState([]);
   const [modlogsButtonColor, setModlogsButtonColor] = useState("primary");
   const [modlogsButtonText, setModlogsButtonText] = useState("Upload Modlogs");
@@ -40,9 +40,9 @@ export const UserForm = (props) => {
       type: "",
       priority: "",
       playerData: {
-        name: !tokenInfo.username ? "" : tokenInfo.username,
-        id: !tokenInfo.id ? "" : tokenInfo.id,
-        avatar: !tokenInfo.avatar ? "" : tokenInfo.avatar,
+        name: !tokenInfo.data.username ? "" : tokenInfo.data.username,
+        id: !tokenInfo.data.id ? "" : tokenInfo.data.id,
+        avatar: !tokenInfo.data.avatar ? "" : tokenInfo.data.avatar,
       },
       version: "",
       description: "",
@@ -146,9 +146,9 @@ export const UserForm = (props) => {
                 type: "",
                 priority: "",
                 playerData: {
-                  name: !tokenInfo.username ? "" : tokenInfo.username,
-                  id: !tokenInfo.id ? "" : tokenInfo.id,
-                  avatar: !tokenInfo.avatar ? "" : tokenInfo.avatar,
+                  name: !tokenInfo.data.username ? "" : tokenInfo.data.username,
+                  id: !tokenInfo.data.id ? "" : tokenInfo.data.id,
+                  avatar: !tokenInfo.data.avatar ? "" : tokenInfo.data.avatar,
                 },
                 version: "",
                 description: "",
@@ -181,8 +181,7 @@ export const UserForm = (props) => {
     });
   };
 
-  console.log(newIssue.playerData);
-  return !tokenInfo ? (
+  return !tokenInfo.data ? (
     <div>
       <Alert severity="warning">
         <AlertTitle>Cannot Submit Form</AlertTitle>

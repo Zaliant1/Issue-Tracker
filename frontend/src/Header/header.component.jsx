@@ -23,11 +23,14 @@ import {
   ListItemText,
   Toolbar,
   Fab,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import LoginIcon from "@mui/icons-material/Login";
+import HomeIcon from "@mui/icons-material/Home";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+const currentDatetime = new Date();
 const drawerWidth = 240;
 const theme = createTheme({
   palette: {
@@ -38,18 +41,19 @@ const theme = createTheme({
 });
 
 export const Header = () => {
+  const { setUserState } = useContext(UserContext);
+  const { tokenInfo } = useContext(UserContext);
   const [categories, setCategories] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [userData, setUserData] = useState();
   const navigate = useNavigate();
   const location = useLocation();
   let params = useParams();
-
   let code = searchParams.get("code");
+
   if (code) {
     axios.post(`/api/user/discord/${code}`).then((res) => {
       if (res.data) {
-        localStorage.setItem("user_auth", JSON.stringify(res.data));
+        localStorage.setItem("userAuth", JSON.stringify(res.data));
         axios
           .get("https://discord.com/api/v8/users/@me", {
             headers: {
@@ -57,17 +61,37 @@ export const Header = () => {
             },
           })
           .then((discordRes) => {
-            setUserData(discordRes.data);
-            localStorage.setItem("user_info", JSON.stringify(discordRes.data));
+            const newDatetime = new Date(
+              currentDatetime.getTime() + 1 * 60 * 1000
+            );
+            localStorage.setItem(
+              "userInfo",
+              JSON.stringify({ data: discordRes.data, expireDate: newDatetime })
+            );
+
             navigate("/");
+            setUserState(JSON.parse(localStorage.getItem(["userInfo"])));
           });
       }
     });
   }
 
-  if (!userData && localStorage.getItem(["user_info"])) {
-    setUserData(JSON.parse(localStorage.getItem(["user_info"])));
-  }
+  useEffect(() => {
+    if (tokenInfo) {
+      if (new Date(tokenInfo.expireDate) < currentDatetime) {
+        console.log(
+          "current is past the token, resetting and logging user out"
+        );
+        localStorage.removeItem("expireDate");
+        localStorage.removeItem("userInfo");
+        setUserState("");
+      }
+    }
+
+    if (!tokenInfo && localStorage.getItem(["userInfo"])) {
+      setUserState(JSON.parse(localStorage.getItem(["userInfo"])));
+    }
+  }, [tokenInfo, setUserState]);
 
   useEffect(() => {
     if (!categories[0]) {
@@ -86,7 +110,14 @@ export const Header = () => {
           sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         >
           <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Fab size="small" onClick={() => navigate("/")}>
+              <HomeIcon />
+            </Fab>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, pl: 1 }}
+            >
               Project Management
             </Typography>
 
@@ -98,16 +129,16 @@ export const Header = () => {
               Project
               <AddIcon />
             </Fab>
-            {userData ? (
+            {tokenInfo ? (
               <ThemeProvider theme={theme}>
                 <Fab
                   color="discord"
                   variant="circular"
-                  onClick={() => navigate(`/user/${userData.id}`)}
+                  onClick={() => navigate(`/user/${tokenInfo.id}`)}
                 >
                   <Avatar
-                    src={`https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`}
-                    alt={userData.username}
+                    src={`https://cdn.discordapp.com/avatars/${tokenInfo.data.id}/${tokenInfo.data.avatar}.png`}
+                    alt={tokenInfo.data.username}
                     sx={{ width: 50, height: 50 }}
                   />
                 </Fab>
@@ -142,11 +173,18 @@ export const Header = () => {
           sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         >
           <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Fab size="small" onClick={() => navigate("/")}>
+              <HomeIcon />
+            </Fab>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ flexGrow: 1, pl: 1 }}
+            >
               Project Management
             </Typography>
 
-            {userData ? (
+            {tokenInfo ? (
               <div>
                 <Fab
                   variant="extended"
@@ -160,11 +198,11 @@ export const Header = () => {
                   <Fab
                     color="discord"
                     variant="circular"
-                    onClick={() => navigate(`/user/${userData.id}`)}
+                    onClick={() => navigate(`/user/${tokenInfo.id}`)}
                   >
                     <Avatar
-                      src={`https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`}
-                      alt={userData.username}
+                      src={`https://cdn.discordapp.com/avatars/${tokenInfo.data.id}/${tokenInfo.data.avatar}.png`}
+                      alt={tokenInfo.data.username}
                       sx={{ width: 50, height: 50 }}
                     />
                   </Fab>

@@ -7,10 +7,13 @@ export const UserProvider = (props) => {
     JSON.parse(localStorage.getItem("user_info"))
   );
 
-  console.log(tokenInfo);
+  const updateUserState = (newState) => {
+    setUserState(newState);
+    localStorage.setItem("userInfo", JSON.stringify(newState));
+  };
 
   return (
-    <UserContext.Provider value={tokenInfo}>
+    <UserContext.Provider value={{ tokenInfo, setUserState: updateUserState }}>
       {props.children}
     </UserContext.Provider>
   );
