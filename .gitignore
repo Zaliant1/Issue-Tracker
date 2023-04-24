@@ -20,5 +20,5 @@ yarn-debug.log*
 yarn-error.log*
 
 node_modules
-ticketing system workplace.code-workspace
+*.code-workspace
 notes.txt
