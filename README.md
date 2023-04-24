@@ -85,6 +85,20 @@
 }
 ```
 
+### Notification
+```
+{
+    _id: ObjectId(),
+    user_id: discord_user_id,
+    project_name: String,
+    link: String,
+    is_read: Boolean,
+    message: String,
+    created_at: Datetime
+    type: error | info | success
+}
+```
+
 ## Bot Commands
 
 ## /create-project

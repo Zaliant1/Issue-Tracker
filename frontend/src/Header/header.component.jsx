@@ -23,7 +23,6 @@ import {
   ListItemText,
   Toolbar,
   Fab,
-  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import LoginIcon from "@mui/icons-material/Login";
@@ -41,8 +40,7 @@ const theme = createTheme({
 });
 
 export const Header = () => {
-  const { setUserState } = useContext(UserContext);
-  const { tokenInfo } = useContext(UserContext);
+  const { tokenInfo, setUserState } = useContext(UserContext);
   const [categories, setCategories] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -62,7 +60,7 @@ export const Header = () => {
           })
           .then((discordRes) => {
             const newDatetime = new Date(
-              currentDatetime.getTime() + 1 * 60 * 1000
+              currentDatetime.getTime() + 12 * 60 * 60 * 1000
             );
             localStorage.setItem(
               "userInfo",
@@ -85,6 +83,7 @@ export const Header = () => {
         localStorage.removeItem("expireDate");
         localStorage.removeItem("userInfo");
         setUserState("");
+        navigate("/");
       }
     }
 
@@ -134,7 +133,7 @@ export const Header = () => {
                 <Fab
                   color="discord"
                   variant="circular"
-                  onClick={() => navigate(`/user/${tokenInfo.id}`)}
+                  onClick={() => navigate(`/user/${tokenInfo.data.id}`)}
                 >
                   <Avatar
                     src={`https://cdn.discordapp.com/avatars/${tokenInfo.data.id}/${tokenInfo.data.avatar}.png`}
@@ -198,7 +197,7 @@ export const Header = () => {
                   <Fab
                     color="discord"
                     variant="circular"
-                    onClick={() => navigate(`/user/${tokenInfo.id}`)}
+                    onClick={() => navigate(`/user/${tokenInfo.data.id}`)}
                   >
                     <Avatar
                       src={`https://cdn.discordapp.com/avatars/${tokenInfo.data.id}/${tokenInfo.data.avatar}.png`}

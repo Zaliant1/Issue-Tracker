@@ -9,19 +9,6 @@ router = APIRouter(prefix="/api")
 db = utils.get_db_client()
 
 
-@router.get("/project/{project_name}")
-async def get_project(project_name):
-    project = db.projects.find_one({"name": project_name})
-
-    if project:
-        return utils.json_ready(
-            {
-                **project,
-                "webhooks": [i for i in db.webhooks.find({"name": project_name})],
-            }
-        )
-
-
 @router.put("/project")
 async def create_project(request: Request):
     req_info = await request.json()
@@ -48,6 +35,25 @@ async def create_project(request: Request):
         )
     else:
         raise HTTPException(status_code=503, detail="Unable write issue to database")
+
+
+@router.get("/projects/")
+async def get_all_projects():
+    projects = list(db.projects.find())
+    return utils.prepare_json(projects)
+
+
+@router.get("/project/{project_name}")
+async def get_project(project_name):
+    project = db.projects.find_one({"name": project_name})
+
+    if project:
+        return utils.json_ready(
+            {
+                **project,
+                "webhooks": [i for i in db.webhooks.find({"name": project_name})],
+            }
+        )
 
 
 @router.put("/project/webhooks")
@@ -133,12 +139,6 @@ async def create_categories(request: Request, name: str):
             status_code=503,
             detail=f"Unable write to database",
         )
-
-
-@router.get("/projects/")
-async def get_all_projects():
-    projects = list(db.projects.find())
-    return utils.prepare_json(projects)
 
 
 # @router.get("/project/{name}/issues")
